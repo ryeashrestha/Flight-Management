@@ -322,7 +322,24 @@ public class ListFlightsWindow extends JFrame implements ActionListener {
             loadDepartedFlights();
             loadFutureFlights();
         } else if (e.getSource() == filterButton) {
-            // Handle filtering logic
+            try {
+                double minPrice = minPriceField.getText().isEmpty() ? Double.NEGATIVE_INFINITY : Double.parseDouble(minPriceField.getText());
+                double maxPrice = maxPriceField.getText().isEmpty() ? Double.POSITIVE_INFINITY : Double.parseDouble(maxPriceField.getText());
+                String airlineFilter = airlineField.getText().trim().toLowerCase();
+                String destinationFilter = destinationField.getText().trim().toLowerCase();
+
+                List<Flight> allFlights = fbs.getActiveFlights();
+                List<Flight> filteredFlights = allFlights.stream()
+                        .filter(flight -> flight.getPrice() >= minPrice && flight.getPrice() <= maxPrice)
+                        .filter(flight -> airlineFilter.isEmpty() || flight.getFlightNumber().toLowerCase().contains(airlineFilter))
+                        .filter(flight -> destinationFilter.isEmpty() || flight.getDestination().toLowerCase().contains(destinationFilter))
+                        .collect(Collectors.toList());
+
+                loadFlights(filteredFlights);
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid price range. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else if (e.getSource() == sortButton) {
             List<Flight> sortedFlights = fbs.sortFlightsByPrice();
             loadFlights(sortedFlights);
